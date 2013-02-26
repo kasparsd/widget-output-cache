@@ -2,7 +2,7 @@
 /*
 	Plugin Name: Widget Output Cache
 	Description: Caches widget output in WordPress object cache
-	Version: 0.1
+	Version: 0.2
 	Author: Kaspars Dambis
 	Author URI: http://konstruktors.com
 */
@@ -25,7 +25,7 @@ function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 	}
 
 	echo $cached_widget;
-	printf( '<!-- from widget cache in %s seconds. -->', microtime(true) - $timer_start );
+	printf( '<!-- from widget cache in %s seconds. -->', number_format( microtime(true) - $timer_start, 5 ) );
 
 	// We already echoed the widget here, so return false
 	return false;
