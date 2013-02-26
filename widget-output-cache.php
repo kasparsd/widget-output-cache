@@ -10,8 +10,9 @@
 add_filter( 'widget_display_callback', 'maybe_cache_widget_output', 10, 3 );
 
 function maybe_cache_widget_output( $instance, $widget_object, $args ) {
+	$timer_start = microtime(true);
 	$cache_key = 'widget-' . md5( serialize( array( $instance, $args ) ) );
-	
+
 	$cached_widget = get_transient( $cache_key );
 
 	if ( $cached_widget == false ) {
@@ -24,6 +25,7 @@ function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 	}
 
 	echo $cached_widget;
+	printf( '<!-- from widget cache in %s seconds. -->', microtime(true) - $timer_start );
 
 	// We already echoed the widget here, so return false
 	return false;
