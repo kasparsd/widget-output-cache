@@ -2,9 +2,11 @@
 /*
 	Plugin Name: Widget Output Cache
 	Description: Caches widget output in WordPress object cache
-	Version: 0.3
+	Version: 0.3.1
+	Plugin URI: https://github.com/kasparsd/widget-output-cache
+	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
-	Author URI: http://konstruktors.com
+	Author URI: http://kaspars.net
 */
 
 add_filter( 'widget_display_callback', 'maybe_cache_widget_output', 10, 3 );
