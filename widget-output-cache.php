@@ -1,8 +1,8 @@
 <?php
 /*
-	Plugin Name: Widget Output Cache
-	Description: Caches widget output in WordPress object cache
-	Version: 0.3.1
+	Plugin Name: Widget & Menu Output Cache
+	Description: Caches widget and menu output in WordPress object cache.
+	Version: 0.4
 	Plugin URI: https://github.com/kasparsd/widget-output-cache
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
@@ -13,7 +13,7 @@ add_filter( 'widget_display_callback', 'maybe_cache_widget_output', 10, 3 );
 
 function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 	$timer_start = microtime(true);
-	$cache_key = 'widget-' . md5( serialize( array( $instance, $args ) ) );
+	$cache_key = 'cache-widget-' . md5( serialize( array( $instance, $args ) ) );
 
 	$cached_widget = get_transient( $cache_key );
 
@@ -35,3 +35,40 @@ function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 	// We already echoed the widget, so return false
 	return false;
 }
+
+// World's first plugin to use this new filter added to WordPress core (by me!)
+// See: https://core.trac.wordpress.org/ticket/23627
+add_filter( 'pre_wp_nav_menu', 'maybe_cache_return_menu_output', 10, 2 );
+
+function maybe_cache_return_menu_output( $nav_menu, $args ) {
+	$cache_key = 'cache-menu-' . md5( serialize( $args ) );
+	$cached_menu = get_transient( $cache_key );
+
+	// Return the menu from cache
+	if ( ! empty( $cached_menu ) )
+		return $cached_menu;
+
+	return $nav_menu;
+}
+
+// Store menu output in a transient
+add_filter( 'wp_nav_menu', 'maybe_cache_menu_output', 10, 2 );
+
+function maybe_cache_menu_output( $nav_menu, $args ) {
+	$cache_key = 'cache-menu-' . md5( serialize( $args ) );
+
+	// Store menu output in a transient
+	set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 60 * 5, $args ) );
+
+	return $nav_menu;
+}
+
+// Clear menu output cache after updating a menu
+add_action( 'wp_update_nav_menu', 'woc_clear_menu_output_cache', 10, 2 );
+
+function woc_clear_menu_output_cache( $menu_id, $menu_data ) {
+	$cache_key = 'cache-menu-' . md5( serialize( $menu_data ) );
+
+	delete_transient( $cache_key );
+}
+
