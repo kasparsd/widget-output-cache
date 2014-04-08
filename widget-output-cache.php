@@ -63,12 +63,3 @@ function maybe_cache_menu_output( $nav_menu, $args ) {
 	return $nav_menu;
 }
 
-// Clear menu output cache after updating a menu
-add_action( 'wp_update_nav_menu', 'woc_clear_menu_output_cache', 10, 2 );
-
-function woc_clear_menu_output_cache( $menu_id, $menu_data ) {
-	$cache_key = 'cache-menu-' . md5( serialize( $menu_data ) );
-
-	delete_transient( $cache_key );
-}
-
