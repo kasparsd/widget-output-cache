@@ -51,8 +51,10 @@ function maybe_cache_return_menu_output( $nav_menu, $args ) {
 	return $nav_menu;
 }
 
-// Store menu output in a transient
-add_filter( 'wp_nav_menu', 'maybe_cache_menu_output', 10, 2 );
+// Store menu output in a transient if WP 3.9+
+if ( version_compare( $wp_version, '3.9-RC', '>=' ) ) {
+	add_filter( 'wp_nav_menu', 'maybe_cache_menu_output', 10, 2 );
+}
 
 function maybe_cache_menu_output( $nav_menu, $args ) {
 	$cache_key = 'cache-menu-' . md5( serialize( $args ) );
