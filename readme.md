@@ -34,6 +34,9 @@ None.
 
 ## Changelog
 
+### 0.4.2
+* Store menu cache only if WordPress supports `pre_wp_nav_menu`.
+
 ### 0.4
 * Add support for menu output caching.
 
