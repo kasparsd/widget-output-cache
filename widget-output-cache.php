@@ -12,8 +12,10 @@
 add_filter( 'widget_display_callback', 'maybe_cache_widget_output', 10, 3 );
 
 function maybe_cache_widget_output( $instance, $widget_object, $args ) {
+	
 	$timer_start = microtime(true);
-	$cache_key = 'cache-widget-' . md5( serialize( array( $instance, $args ) ) );
+
+	$cache_key = 'cache-widget-' . md5( serialize( array( $instance, $args ) ) ) . get_option( 'cache-widgets-version', 1 );
 
 	$cached_widget = get_transient( $cache_key );
 
@@ -23,7 +25,7 @@ function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 			$cached_widget = ob_get_contents();
 		ob_end_clean();
 
-		set_transient( $cache_key, $cached_widget, apply_filters( 'widget_output_cache_ttl', 60 * 5, $args ) );
+		set_transient( $cache_key, $cached_widget, apply_filters( 'widget_output_cache_ttl', 60 * 60, $args ) );
 	}
 
 	printf( 
@@ -34,14 +36,17 @@ function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 
 	// We already echoed the widget, so return false
 	return false;
+
 }
+
 
 // World's first plugin to use this new filter added to WordPress core (by me!)
 // See: https://core.trac.wordpress.org/ticket/23627
 add_filter( 'pre_wp_nav_menu', 'maybe_cache_return_menu_output', 10, 2 );
 
 function maybe_cache_return_menu_output( $nav_menu, $args ) {
-	$cache_key = 'cache-menu-' . md5( serialize( $args ) );
+
+	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . get_option( 'cache-menus-version', 1 );
 	$cached_menu = get_transient( $cache_key );
 
 	// Return the menu from cache
@@ -49,7 +54,9 @@ function maybe_cache_return_menu_output( $nav_menu, $args ) {
 		return $cached_menu;
 
 	return $nav_menu;
+
 }
+
 
 // Store menu output in a transient if WP 3.9+
 if ( version_compare( $wp_version, '3.9-RC', '>=' ) ) {
@@ -57,11 +64,17 @@ if ( version_compare( $wp_version, '3.9-RC', '>=' ) ) {
 }
 
 function maybe_cache_menu_output( $nav_menu, $args ) {
-	$cache_key = 'cache-menu-' . md5( serialize( $args ) );
+
+	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . get_option( 'cache-menus-version', 1 );
 
 	// Store menu output in a transient
-	set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 60 * 5, $args ) );
+	set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 60 * 60, $args ) );
 
 	return $nav_menu;
+
 }
+
+
+// Cache invalidation for menus
+
 
