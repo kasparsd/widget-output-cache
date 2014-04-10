@@ -9,13 +9,15 @@
 	Author URI: http://kaspars.net
 */
 
+
 add_filter( 'widget_display_callback', 'maybe_cache_widget_output', 10, 3 );
 
 function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 	
 	$timer_start = microtime(true);
 
-	$cache_key = 'cache-widget-' . md5( serialize( array( $instance, $args ) ) ) . get_option( 'cache-widgets-version', 1 );
+	$version = get_option( 'cache-widgets-version', 1 );
+	$cache_key = 'cache-widget-' . md5( serialize( array( $instance, $args ) ) ) . $version;
 
 	$cached_widget = get_transient( $cache_key );
 
@@ -46,7 +48,8 @@ add_filter( 'pre_wp_nav_menu', 'maybe_cache_return_menu_output', 10, 2 );
 
 function maybe_cache_return_menu_output( $nav_menu, $args ) {
 
-	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . get_option( 'cache-menus-version', 1 );
+	$version = get_option( 'cache-menus-version', 1 );
+	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . $version;
 	$cached_menu = get_transient( $cache_key );
 
 	// Return the menu from cache
@@ -58,6 +61,8 @@ function maybe_cache_return_menu_output( $nav_menu, $args ) {
 }
 
 
+global $wp_version;
+
 // Store menu output in a transient if WP 3.9+
 if ( version_compare( $wp_version, '3.9-RC', '>=' ) ) {
 	add_filter( 'wp_nav_menu', 'maybe_cache_menu_output', 10, 2 );
@@ -65,7 +70,8 @@ if ( version_compare( $wp_version, '3.9-RC', '>=' ) ) {
 
 function maybe_cache_menu_output( $nav_menu, $args ) {
 
-	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . get_option( 'cache-menus-version', 1 );
+	$versions = get_option( 'cache-menus-version', 1 );
+	$cache_key = 'cache-menu-' . md5( serialize( $args ) );
 
 	// Store menu output in a transient
 	set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 60 * 60, $args ) );
@@ -76,5 +82,25 @@ function maybe_cache_menu_output( $nav_menu, $args ) {
 
 
 // Cache invalidation for menus
+add_action( 'wp_update_nav_menu', 'menu_output_cache_bump' );
+
+function menu_output_cache_bump() {
+
+	update_option( 'cache-menus-version', time() );
+
+}
+
+
+// Cache invalidation for widgets
+add_filter( 'widget_update_callback', 'widget_output_cache_bump' );
+
+function widget_output_cache_bump( $instance ) {
+
+	update_option( 'cache-widgets-version', time() );
+
+	return $instance;
+
+}
+
 
 
