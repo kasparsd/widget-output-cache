@@ -14,6 +14,8 @@ Improve website performance by caching widget and menu output in WordPress trans
 
 Uses the `pre_wp_nav_menu` filter (introduced in WordPress 3.9) to short-circuit menu rendering and PHP output buffering to extract widget output and store it into WordPress transients for later retrieval.
 
+In theory, it should save up to six database queries per menu on each page load!
+
 It is a quick fix for bad behaving plugins that parse RSS feeds or call remote URLs on every page load.
 
 
