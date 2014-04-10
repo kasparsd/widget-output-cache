@@ -27,7 +27,7 @@ function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 			$cached_widget = ob_get_contents();
 		ob_end_clean();
 
-		set_transient( $cache_key, $cached_widget, apply_filters( 'widget_output_cache_ttl', 0, $args ) );
+		set_transient( $cache_key, $cached_widget, apply_filters( 'widget_output_cache_ttl', 60 * 12, $args ) );
 	}
 
 	printf( 
@@ -74,7 +74,7 @@ function maybe_cache_menu_output( $nav_menu, $args ) {
 	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . $version;
 
 	// Store menu output in a transient
-	set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 0, $args ) );
+	set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 60 * 12, $args ) );
 	
 	return $nav_menu;
 
