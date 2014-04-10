@@ -7,12 +7,12 @@ Tested up to: 3.9
 Stable tag: trunk   
 License: GPLv2 or later   
 
-Cache widget and menu output in WordPress transients.
+Improve website performance by caching widget and menu output in WordPress transients.
 
 
 ## Description
 
-Uses PHP output buffering to extract widget output and store it into WordPress transients for later retrieval. Transient expiry is set to five minutes.
+Uses the `pre_wp_nav_menu` filter (introduced in WordPress 3.9) to short-circuit menu rendering and PHP output buffering to extract widget output and store it into WordPress transients for later retrieval.
 
 It is a quick fix for bad behaving plugins that parse RSS feeds or call remote URLs on every page load.
 
@@ -33,6 +33,9 @@ None.
 
 
 ## Changelog
+
+### 0.4.3
+* Add cache versioning for simple invalidation.
 
 ### 0.4.2
 * Store menu cache only if WordPress supports `pre_wp_nav_menu`.
