@@ -36,6 +36,9 @@ None.
 
 ## Changelog
 
+### 0.4.4
+* Honor widgets being hidden using the `widget_display_callback` filter.
+
 ### 0.4.3
 * Add cache versioning for simple invalidation.
 

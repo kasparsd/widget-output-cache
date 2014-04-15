@@ -2,7 +2,7 @@
 /*
 	Plugin Name: Widget & Menu Output Cache
 	Description: Caches widget and menu output in WordPress object cache.
-	Version: 0.4.3
+	Version: 0.4.4
 	Plugin URI: https://github.com/kasparsd/widget-output-cache
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
@@ -14,6 +14,10 @@ add_filter( 'widget_display_callback', 'maybe_cache_widget_output', 10, 3 );
 
 function maybe_cache_widget_output( $instance, $widget_object, $args ) {
 	
+	// Don't return the widget
+	if ( false === $instance )
+		return $instance;
+
 	$timer_start = microtime(true);
 
 	$version = get_option( 'cache-widgets-version', 1 );
