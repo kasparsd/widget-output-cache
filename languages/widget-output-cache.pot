@@ -1,0 +1,37 @@
+# Copyright (C) 2014 Widget Output Cache
+# This file is distributed under the same license as the Widget Output Cache package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Widget Output Cache 0.5\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/git\n"
+"POT-Creation-Date: 2014-10-17 14:39:20+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: widget-output-cache.php:139
+msgid "Exclude this widget from cache"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Widget Output Cache"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/kasparsd/widget-output-cache"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Caches widget output in WordPress object cache."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Kaspars Dambis"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://kaspars.net"
+msgstr ""
