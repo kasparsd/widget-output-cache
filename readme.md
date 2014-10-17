@@ -36,6 +36,10 @@ None.
 
 ## Changelog
 
+### 0.5
+* Remove menu cache due to "active" menu item bug.
+* Allow individual widgets to be excluded from being cached.
+
 ### 0.4.4
 * Honor widgets being hidden using the `widget_display_callback` filter.
 
