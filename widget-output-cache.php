@@ -1,8 +1,8 @@
 <?php
 /*
-	Plugin Name: Widget & Menu Output Cache
-	Description: Caches widget and menu output in WordPress object cache.
-	Version: 0.4.4
+	Plugin Name: Widget Output Cache
+	Description: Caches widget output in WordPress object cache.
+	Version: 0.5
 	Plugin URI: https://github.com/kasparsd/widget-output-cache
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
@@ -10,99 +10,166 @@
 */
 
 
-add_filter( 'widget_display_callback', 'maybe_cache_widget_output', 10, 3 );
+WidgetOutputCache::instance();
 
-function maybe_cache_widget_output( $instance, $widget_object, $args ) {
-	
-	// Don't return the widget
-	if ( false === $instance )
-		return $instance;
 
-	$timer_start = microtime(true);
+class WidgetOutputCache {
 
-	$version = get_option( 'cache-widgets-version', 1 );
-	$cache_key = 'cache-widget-' . md5( serialize( array( $instance, $args ) ) ) . $version;
+	// Store IDs of widgets to exclude from cache
+	private $excluded_ids = array();
 
-	$cached_widget = get_transient( $cache_key );
 
-	if ( empty( $cached_widget ) ) {
-		ob_start();
-			$widget_object->widget( $args, $instance );
-			$cached_widget = ob_get_contents();
-		ob_end_clean();
+	protected function __construct() {
 
-		set_transient( $cache_key, $cached_widget, apply_filters( 'widget_output_cache_ttl', 60 * 12, $args ) );
+		// Enable localization
+		add_action( 'plugins_loaded', array( $this, 'init_l10n' ) );
+
+		// Overwrite widget callback to cache the output
+		add_filter( 'widget_display_callback', array( $this, 'widget_callback' ), 10, 3 );
+
+		// Cache invalidation for widgets
+		add_filter( 'widget_update_callback', array( $this, 'cache_bump' ) );
+
+		// Allow widgets to be excluded from the cache
+		add_action( 'in_widget_form', array( $this, 'widget_controls' ), 10, 3 );
+
+		// Load widget cache exclude settings
+		add_action( 'init', array( $this, 'init' ), 10 );
+
+		// Save widget cache settings
+		add_action( 'sidebar_admin_setup', array( $this, 'save_widget_controls' ) );
+
 	}
 
-	printf( 
-		"%s <!-- From widget cache in %s seconds -->",
-		$cached_widget,
-		number_format( microtime(true) - $timer_start, 5 ) 
-	);
 
-	// We already echoed the widget, so return false
-	return false;
+	public static function instance() {
 
-}
+		static $instance;
 
+		if ( ! $instance )
+			$instance = new self();
 
-// World's first plugin to use this new filter added to WordPress core (by me!)
-// See: https://core.trac.wordpress.org/ticket/23627
-add_filter( 'pre_wp_nav_menu', 'maybe_cache_return_menu_output', 10, 2 );
+		return $instance;
 
-function maybe_cache_return_menu_output( $nav_menu, $args ) {
-
-	$version = get_option( 'cache-menus-version', 1 );
-	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . $version;
-	$cached_menu = get_transient( $cache_key );
-
-	// Return the menu from cache
-	if ( ! empty( $cached_menu ) )
-		return $cached_menu;
-
-	return $nav_menu;
-
-}
-
-
-global $wp_version;
-
-// Store menu output in a transient if WP 3.9+
-if ( version_compare( $wp_version, '3.9-RC', '>=' ) ) {
-	add_filter( 'wp_nav_menu', 'maybe_cache_menu_output', 10, 2 );
-}
-
-function maybe_cache_menu_output( $nav_menu, $args ) {
-
-	$version = get_option( 'cache-menus-version', 1 );
-	$cache_key = 'cache-menu-' . md5( serialize( $args ) ) . $version;
-
-	// Store menu output in a transient
-	set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 60 * 12, $args ) );
+	}
 	
-	return $nav_menu;
 
-}
+	function init_l10n() {
 
+		load_plugin_textdomain( 'widget-output-cache', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
-// Cache invalidation for menus
-add_action( 'wp_update_nav_menu', 'menu_output_cache_bump' );
-
-function menu_output_cache_bump() {
-
-	update_option( 'cache-menus-version', time() );
-
-}
+	}
 
 
-// Cache invalidation for widgets
-add_filter( 'widget_update_callback', 'widget_output_cache_bump' );
+	function init() {
 
-function widget_output_cache_bump( $instance ) {
+		$this->excluded_ids = (array) get_option( 'cache-widgets-excluded', array() );
 
-	update_option( 'cache-widgets-version', time() );
+	}
 
-	return $instance;
+
+	function widget_callback( $instance, $widget_object, $args ) {
+		
+		// Don't return the widget
+		if ( false === $instance || ! is_subclass_of( $widget_object, 'WP_Widget' ) )
+			return $instance;
+
+		if ( in_array( $widget_object->id, $this->excluded_ids ) )
+			return $instance;
+
+		$timer_start = microtime(true);
+
+		$cache_key = sprintf(
+				'cwdgt-%s-%s',
+				substr( md5( $widget_object->id, true ), 0, 24 ),
+				get_option( 'cache-widgets-version', 1 )
+			);
+
+		$cached_widget = get_transient( $cache_key );
+
+		if ( empty( $cached_widget ) ) {
+
+			ob_start();
+				$widget_object->widget( $args, $instance );
+				$cached_widget = ob_get_contents();
+			ob_end_clean();
+
+			set_transient( 
+				$cache_key, 
+				$cached_widget,
+				apply_filters( 'widget_output_cache_ttl', 60 * 12, $args ) 
+			);
+
+		}
+
+		printf( 
+			"%s <!-- From widget cache in %s seconds -->",
+			$cached_widget,
+			number_format( microtime(true) - $timer_start, 5 ) 
+		);
+
+		// We already echoed the widget, so return false
+		return false;
+
+	}
+
+
+	function cache_bump( $instance ) {
+
+		update_option( 'cache-widgets-version', time() );
+
+		return $instance;
+
+	}
+
+
+	function widget_controls( $object, $return, $instance ) {
+
+		$is_excluded = in_array( $object->id, $this->excluded_ids );
+
+		printf(
+			'<p>
+				<label>
+					<input type="checkbox" name="widget-cache-exclude" value="%s" %s />
+					%s
+				</label>
+			</p>',
+			esc_attr( $object->id ),
+			checked( $is_excluded, true, false ),
+			esc_html__( 'Exclude this widget from cache', 'widget-output-cache' )
+		);
+
+	}
+
+
+	function save_widget_controls() {
+
+		// current_user_can( 'edit_theme_options' ) is already being checked in widgets.php
+		if ( empty( $_POST ) || ! isset( $_POST['widget-id'] ) )
+			return;
+
+		$widget_id = $_POST['widget-id'];
+		$is_excluded = isset( $_POST['widget-cache-exclude'] );
+
+		if ( ! isset($_POST['delete_widget']) && $is_excluded ) {
+
+			// Wiget is being saved and it is being excluded too
+			$this->excluded_ids[] = $widget_id;
+
+		} elseif ( in_array( $widget_id, $this->excluded_ids ) ) {
+
+			// Widget is being removed, remove it from exclusions too
+			$exclude_pos_key = array_search( $widget_id, $this->excluded_ids );
+			unset( $this->excluded_ids[ $exclude_pos_key ] );
+
+		}
+
+		$this->excluded_ids = array_unique( $this->excluded_ids );
+
+		update_option( 'cache-widgets-excluded', $this->excluded_ids );
+
+	}
+
 
 }
 
