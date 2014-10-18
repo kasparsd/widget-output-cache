@@ -2,7 +2,7 @@
 /*
 	Plugin Name: Widget Output Cache
 	Description: Caches widget output in WordPress object cache.
-	Version: 0.5
+	Version: 0.5.1
 	Plugin URI: https://wordpress.org/plugins/widget-output-cache/
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
@@ -77,11 +77,9 @@ class WidgetOutputCache {
 		if ( in_array( $widget_object->id, $this->excluded_ids ) )
 			return $instance;
 
-		$timer_start = microtime(true);
-
 		$cache_key = sprintf(
 				'cwdgt-%s-%s',
-				substr( md5( $widget_object->id, true ), 0, 24 ),
+				md5( $widget_object->id ),
 				get_option( 'cache-widgets-version', 1 )
 			);
 
@@ -101,15 +99,17 @@ class WidgetOutputCache {
 			);
 
 		}
+		else
+		{
+			printf(
+				'%s <!-- From widget cache via transient key: %s -->',
+				$cached_widget,
+				$cache_key
+			);
 
-		printf( 
-			'%s <!-- From widget cache in %s seconds -->',
-			$cached_widget,
-			number_format( microtime(true) - $timer_start, 5 ) 
-		);
-
-		// We already echoed the widget, so return false
-		return false;
+			// We already echoed the widget, so return false
+			return false;
+		}
 
 	}
 

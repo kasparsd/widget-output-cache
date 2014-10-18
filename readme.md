@@ -34,6 +34,9 @@ None.
 
 ## Changelog
 
+### 0.5.1
+* Fixed transient name generation issue
+
 ### 0.5
 * Remove menu cache due to "active" menu item bug.
 * Allow individual widgets to be excluded from being cached.
