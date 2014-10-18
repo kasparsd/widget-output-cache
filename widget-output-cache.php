@@ -92,12 +92,13 @@ class WidgetOutputCache {
 				$cached_widget = ob_get_contents();
 			ob_end_clean();
 
-			set_transient( 
-				$cache_key, 
+			set_transient(
+				$cache_key,
 				$cached_widget,
-				apply_filters( 'widget_output_cache_ttl', 60 * 12, $args ) 
+				apply_filters( 'widget_output_cache_ttl', 60 * 12, $args )
 			);
 
+			printf('%s', $cached_widget);
 		}
 		else
 		{
@@ -106,11 +107,10 @@ class WidgetOutputCache {
 				$cached_widget,
 				$cache_key
 			);
-
-			// We already echoed the widget, so return false
-			return false;
 		}
 
+		// We already echoed the widget, so return false
+		return false;
 	}
 
 
