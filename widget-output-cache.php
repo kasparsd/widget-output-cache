@@ -2,7 +2,7 @@
 /*
 	Plugin Name: Widget Output Cache
 	Description: Caches widget output in WordPress object cache.
-	Version: 0.5.1
+	Version: 1.0
 	Plugin URI: https://wordpress.org/plugins/widget-output-cache/
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
