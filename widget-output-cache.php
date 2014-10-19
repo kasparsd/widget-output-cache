@@ -1,25 +1,40 @@
 <?php
 /*
-	Plugin Name: Widget Output Cache
-	Description: Caches widget output in WordPress object cache.
+	Plugin Name: Partial Cache
+	Description: Caches widget and menu output using the WordPress object cache.
 	Version: 1.0
 	Plugin URI: https://wordpress.org/plugins/widget-output-cache/
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
-	Author: Kaspars Dambis
+	Author: kasparsd, khromov
 	Author URI: http://kaspars.net
 */
 
 
-WidgetOutputCache::instance();
+$PartialCachePlugin = PartialCache::instance();
 
+class PartialCache {
 
-class WidgetOutputCache {
+	private static $instance;
+
+	// Text domain
+	private static $td = 'partial-cache';
 
 	// Store IDs of widgets to exclude from cache
 	private $excluded_ids = array();
 
-
 	protected function __construct() {
+
+		global $wp_version;
+
+		/* Menu cache if WP >=3.9 */
+		if ( version_compare( $wp_version, '3.9-RC', '>=' ) ) {
+
+			add_filter( 'wp_nav_menu', array($this, 'menu_cache'), 10, 2 );
+			add_filter( 'pre_wp_nav_menu', array( $this, 'menu_output' ), 10, 2 );
+			add_action( 'wp_update_nav_menu', array( $this, 'menu_cache_bump' ) );
+		}
+
+		/* Widgets cache */
 
 		// Enable localization
 		add_action( 'plugins_loaded', array( $this, 'init_l10n' ) );
@@ -41,22 +56,77 @@ class WidgetOutputCache {
 
 	}
 
+	/**
+	 * Overrides the menu output with cached version
+	 * if one is available.
+	 *
+	 * @param $nav_menu
+	 * @param $args
+	 * @return mixed
+	 */
+	function menu_output( $nav_menu, $args )
+	{
+		$cache_key = sprintf(
+			'pc-m-%s', // m for menus
+			md5(  md5( serialize( $args ) . '-' . get_option( 'cache-menus-version', 1 ) ) )
+		);
 
+		$cached_menu = get_transient( $cache_key );
+		var_dump($cache_key);
+
+		// Return the menu from cache
+		if ( ! empty( $cached_menu ) )
+			return $cached_menu;
+
+		return $nav_menu;
+	}
+
+	/**
+	 * Cache menu output
+	 *
+	 * @param $nav_menu
+	 * @param $args
+	 * @return mixed
+	 */
+	function menu_cache( $nav_menu, $args ) {
+
+		$cache_key = sprintf(
+			'pc-m-%s', // m for menus
+			md5(  md5( serialize( $args ) . '-' . get_option( 'cache-menus-version', 1 ) ) )
+		);
+
+		// Store menu output in a transient
+		set_transient( $cache_key, $nav_menu, apply_filters( 'menu_output_cache_ttl', 60 * 12, $args ) );
+		return $nav_menu;
+	}
+
+	function menu_cache_bump() {
+		update_option( 'cache-menus-version', time() );
+	}
+
+	/**
+	 * Returns the correct
+	 *
+	 * @return PartialCache
+	 */
 	public static function instance() {
 
-		static $instance;
+		// http://stackoverflow.com/a/9159235
+		if (!isset(self::$instance)) {
+			self::$instance = new self();
+		}
 
-		if ( ! $instance )
-			$instance = new self();
-
-		return $instance;
+		return self::$instance;
 
 	}
 
 
+	/**
+	 * Initialize plugin translation
+	 */
 	function init_l10n() {
 
-		load_plugin_textdomain( 'widget-output-cache', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		load_plugin_textdomain( self::$td, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 	}
 
@@ -68,6 +138,14 @@ class WidgetOutputCache {
 	}
 
 
+	/**
+	 * Handles displaying cached widgets on the frontend.
+	 *
+	 * @param $instance
+	 * @param $widget_object
+	 * @param $args
+	 * @return bool
+	 */
 	function widget_callback( $instance, $widget_object, $args ) {
 		
 		// Don't return the widget
@@ -78,8 +156,8 @@ class WidgetOutputCache {
 			return $instance;
 
 		$cache_key = sprintf(
-				'cwdgt-%s',
-				md5( $widget_object->id . get_option( 'cache-widgets-version', 1 ) )
+				'pc-w-%s', //w for widgets
+				md5( $widget_object->id . '-' . get_option( 'cache-widgets-version', 1 ) )
 			);
 
 		$cached_widget = get_transient( $cache_key );
@@ -112,7 +190,18 @@ class WidgetOutputCache {
 		return false;
 	}
 
-
+	/**
+	 * Bumps cache.
+	 *
+	 * TODO: It may be better if we deleted the transients instead of bumping the cache name.
+	 *
+	 * This is because if transients are stored in DB, they will not get cleared this way unless
+	 * you run a dedicated plugin such as this:
+	 * https://wordpress.org/plugins/delete-expired-transients/
+	 *
+	 * @param $instance
+	 * @return mixed
+	 */
 	function cache_bump( $instance ) {
 
 		update_option( 'cache-widgets-version', time() );
