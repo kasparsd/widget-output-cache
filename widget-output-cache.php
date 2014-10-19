@@ -77,6 +77,8 @@ class WidgetOutputCache {
 		if ( in_array( $widget_object->id, $this->excluded_ids ) )
 			return $instance;
 
+		$timer_start = microtime(true);
+
 		$cache_key = sprintf(
 				'cwdgt-%s',
 				md5( $widget_object->id . get_option( 'cache-widgets-version', 1 ) )
@@ -97,19 +99,27 @@ class WidgetOutputCache {
 				apply_filters( 'widget_output_cache_ttl', 60 * 12, $args )
 			);
 
-			printf('%s', $cached_widget);
-		}
-		else
-		{
 			printf(
-				'%s <!-- From widget cache via transient key: %s -->',
+				'%s <!-- Stored in widget cache in %s seconds (%s) -->',
 				$cached_widget,
+				round( microtime(true) - $timer_start, 4 ),
 				$cache_key
 			);
+
+		} else {
+
+			printf(
+				'%s <!-- From widget cache in %s seconds (%s) -->',
+				$cached_widget,
+				round( microtime(true) - $timer_start, 4 ),
+				$cache_key
+			);
+
 		}
 
 		// We already echoed the widget, so return false
 		return false;
+		
 	}
 
 
