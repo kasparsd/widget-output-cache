@@ -2,7 +2,7 @@
 /*
 	Plugin Name: Widget Output Cache
 	Description: Caches widget output in WordPress object cache.
-	Version: 0.5
+	Version: 0.5.1
 	Plugin URI: https://wordpress.org/plugins/widget-output-cache/
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
@@ -77,12 +77,9 @@ class WidgetOutputCache {
 		if ( in_array( $widget_object->id, $this->excluded_ids ) )
 			return $instance;
 
-		$timer_start = microtime(true);
-
 		$cache_key = sprintf(
-				'cwdgt-%s-%s',
-				substr( md5( $widget_object->id, true ), 0, 24 ),
-				get_option( 'cache-widgets-version', 1 )
+				'cwdgt-%s',
+				md5( $widget_object->id . get_option( 'cache-widgets-version', 1 ) )
 			);
 
 		$cached_widget = get_transient( $cache_key );
@@ -94,23 +91,25 @@ class WidgetOutputCache {
 				$cached_widget = ob_get_contents();
 			ob_end_clean();
 
-			set_transient( 
-				$cache_key, 
+			set_transient(
+				$cache_key,
 				$cached_widget,
-				apply_filters( 'widget_output_cache_ttl', 60 * 12, $args ) 
+				apply_filters( 'widget_output_cache_ttl', 60 * 12, $args )
 			);
 
+			printf('%s', $cached_widget);
 		}
-
-		printf( 
-			'%s <!-- From widget cache in %s seconds -->',
-			$cached_widget,
-			number_format( microtime(true) - $timer_start, 5 ) 
-		);
+		else
+		{
+			printf(
+				'%s <!-- From widget cache via transient key: %s -->',
+				$cached_widget,
+				$cache_key
+			);
+		}
 
 		// We already echoed the widget, so return false
 		return false;
-
 	}
 
 
@@ -125,19 +124,7 @@ class WidgetOutputCache {
 
 	function widget_controls( $object, $return, $instance ) {
 
-		$is_excluded = in_array( $object->id, $this->excluded_ids );
-
-		printf(
-			'<p>
-				<label>
-					<input type="checkbox" name="widget-cache-exclude" value="%s" %s />
-					%s
-				</label>
-			</p>',
-			esc_attr( $object->id ),
-			checked( $is_excluded, true, false ),
-			esc_html__( 'Exclude this widget from cache', 'widget-output-cache' )
-		);
+		include('templates/admin-widget.php');
 
 	}
 
