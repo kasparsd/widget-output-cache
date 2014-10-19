@@ -78,9 +78,8 @@ class WidgetOutputCache {
 			return $instance;
 
 		$cache_key = sprintf(
-				'cwdgt-%s-%s',
-				md5( $widget_object->id ),
-				get_option( 'cache-widgets-version', 1 )
+				'cwdgt-%s',
+				md5( $widget_object->id . get_option( 'cache-widgets-version', 1 ) )
 			);
 
 		$cached_widget = get_transient( $cache_key );
