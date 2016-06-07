@@ -3,7 +3,7 @@
 Contributors: kasparsd   
 Tags: cache, caching, widget, widgets, output, transient, object cache, memcache, apc, performance   
 Requires at least: 3.0.1   
-Tested up to: 4.0    
+Tested up to: 4.5.2    
 Stable tag: trunk   
 License: GPLv2 or later   
 
@@ -22,7 +22,7 @@ It is a quick fix for bad behaving plugins that parse RSS feeds or call remote U
 Install it from the official WordPress repository or use the plugin search in your WordPress dashboard.
 
 
-## Frequently Asked Questions 
+## Frequently Asked Questions
 
 None.
 
@@ -34,8 +34,11 @@ None.
 
 ## Changelog
 
+### 0.5.2
+* Tested with WordPress 4.5.2.
+
 ### 0.5.1
-* Fixed transient name generation issue
+* Fixed transient name generation issue.
 
 ### 0.5
 * Remove menu cache due to "active" menu item bug.

@@ -2,7 +2,7 @@
 /*
 	Plugin Name: Widget Output Cache
 	Description: Caches widget output in WordPress object cache.
-	Version: 0.5.1
+	Version: 0.5.2
 	Plugin URI: https://wordpress.org/plugins/widget-output-cache/
 	GitHub URI: https://github.com/kasparsd/widget-output-cache
 	Author: Kaspars Dambis
@@ -69,7 +69,7 @@ class WidgetOutputCache {
 
 
 	function widget_callback( $instance, $widget_object, $args ) {
-		
+
 		// Don't return the widget
 		if ( false === $instance || ! is_subclass_of( $widget_object, 'WP_Widget' ) )
 			return $instance;
@@ -119,7 +119,7 @@ class WidgetOutputCache {
 
 		// We already echoed the widget, so return false
 		return false;
-		
+
 	}
 
 
@@ -181,4 +181,3 @@ class WidgetOutputCache {
 
 
 }
-
