@@ -3,7 +3,7 @@
 Contributors: kasparsd   
 Tags: cache, caching, widget, widgets, output, transient, object cache, memcache, apc, performance   
 Requires at least: 3.0.1   
-Tested up to: 6.9    
+Tested up to: 7.1.4    
 License: GPLv2 or later   
 
 Improve website performance by caching widget output in WordPress transients.
