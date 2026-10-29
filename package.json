@@ -1,0 +1,10 @@
+{
+	"name": "widget-output-cache",
+	"scripts": {
+		"zip": "wp-release zip --slug widget-output-cache --force",
+		"release": "wp-release"
+	},
+	"devDependencies": {
+		"@wpelevator/wp-release": "^0.17.0"
+	}
+}

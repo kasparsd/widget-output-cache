@@ -1,0 +1,11 @@
+.*
+/node_modules/
+/dist/
+package.json
+package-lock.json
+/wp-release.config.mjs
+/CHANGELOG.md
+/readme.md
+*.zip
+*.zip.sig
+*.log

@@ -1,0 +1,6 @@
+/node_modules/
+/dist/
+/checksums.json
+*.zip
+*.zip.sig
+*.log
