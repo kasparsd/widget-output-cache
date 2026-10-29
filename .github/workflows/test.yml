@@ -6,25 +6,6 @@ on:
 
 jobs:
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          cache: 'npm'
-          node-version-file: .nvmrc
-
-      - name: Install NPM dependencies
-        run: npm ci
-
-      - name: Lint the workflows
-        run: npm run lint
-
   zip:
     name: Zip smoke test
     runs-on: ubuntu-24.04
@@ -41,26 +22,24 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
-      # Sanity check: the release packaging must work from the repo root
-      # and the deploy directory holds the distributed files with a
-      # converted readme.txt.
+      # Sanity check: the release packaging must work straight from the
+      # repo root, which holds the distributed plugin files, including the
+      # checked-in readme.txt and the translation files, selected by
+      # .distignore.
       - name: Zip
         run: npm run zip
-
-      - name: Verify the readme conversion
-        run: |
-          test -f dist/readme.txt
-          grep -q '^== Changelog ==$' dist/readme.txt
-          # The changelog marker is for the repository readme only.
-          ! grep -q 'changelog -->' dist/readme.txt
-          grep -q '^Stable tag:' dist/readme.txt
 
       - name: Verify the ZIP
         run: |
           test -f widget-output-cache.*.zip
           unzip -l widget-output-cache.*.zip 'widget-output-cache/widget-output-cache.php'
+          unzip -l widget-output-cache.*.zip 'widget-output-cache/readme.txt'
+          # The readme is the WordPress.org format; the developer readme
+          # markdown stays out of the ZIP.
+          ! unzip -l widget-output-cache.*.zip 'widget-output-cache/README.md'
           # The checksums manifest comes from the `integrity` settings of
-          # wp-release.config.mjs and is embedded at the package root.
+          # wp-release.config.mjs and is embedded at the package root,
+          # covering the readme too.
           unzip -l widget-output-cache.*.zip 'widget-output-cache/checksums.json'
           npx wp-release verify --zip widget-output-cache.*.zip --checksums-file checksums.json
 

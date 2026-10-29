@@ -40,17 +40,6 @@ jobs:
             sudo apt-get install --yes --quiet --no-install-recommends subversion
           fi
 
-      # No plugin build step is needed. The deploy directory only needs the
-      # distributed files and a readme.txt, which WordPress.org requires,
-      # converted from the markdown readme used in Git (see the "build"
-      # script in package.json).
-      #
-      # Build the deploy directory (distributed files plus a converted
-      # readme.txt) for the readme-only deploy on master pushes.
-      - name: Build the deploy directory
-        if: github.event_name == 'push'
-        run: npm run build
-
       # Package the release with the checksums manifest from the
       # `integrity` settings of wp-release.config.mjs embedded at the
       # package root of the ZIP, so the wp.org build, the release ZIP and
@@ -97,12 +86,14 @@ jobs:
 
       # Pushes to master: update the wp.org trunk readme between releases,
       # for example when bumping "Tested up to" or adding changelog
-      # entries. Trunk only ever receives the readme; the rest of trunk
-      # stays at the last tagged build. No SVN credentials are needed
-      # unless something actually changed.
+      # entries. The readme lives in the repository as readme.txt, so the
+      # deploy reads it straight from the repo root. Trunk only ever
+      # receives the readme; the rest of trunk stays at the last tagged
+      # build. No SVN credentials are needed unless something changed on
+      # the server.
       - name: Update the WordPress.org readme
         if: github.event_name == 'push'
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-        run: npx wp-release deploy-svn dist --slug widget-output-cache --readme-only
+        run: npx wp-release deploy-svn . --slug widget-output-cache --readme-only

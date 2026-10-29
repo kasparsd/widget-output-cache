@@ -10,12 +10,9 @@ import {
 export default defineConfig( {
 	baseBranch: 'master',
 	readmeChangelog: true,
-	// The markdown readme carries the changelog in the GitHub repo and is
-	// converted to readme.txt for WordPress.org, so new entries hold plain
-	// `= version =` headings inserted after this marker instead of the
-	// `== Changelog ==` heading that readme.txt-based repos use. The same
-	// marker lives at the top of CHANGELOG.md.
-	changelogInsertAfter: '<!-- changelog -->',
+	// Without an insertion marker, changelog entries in the plugin readme
+	// start right after the "== Changelog ==" heading that is already in
+	// readme.txt; CHANGELOG.md entries go before the first version heading.
 	packages: [
 		{
 			glob: '.',
@@ -27,9 +24,6 @@ export default defineConfig( {
 				from: wordpressPluginVersion(),
 				to: [
 					wordpressPluginVersion(),
-					// No readme.txt in the repository: the Stable tag lives
-					// in the markdown readme, which the tool reads when
-					// readme.txt is absent.
 					wordpressStableTag(),
 				],
 			},
