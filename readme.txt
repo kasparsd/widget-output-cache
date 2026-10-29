@@ -40,7 +40,7 @@ None.
 
 = 0.5.3 =
 
-* Tested with WordPress 6.9, and noted in the description that the plugin supports only Classic Widgets. Releases are now versioned, changelogged and packaged with `@wpelevator/wp-release`.
+* Tested with WordPress 7.1, and the documentation was updated to cover the current formatting. Releases are now versioned, changelogged and packaged with `@wpelevator/wp-release`.
 
 = 0.5.2 =
 * Tested with WordPress 4.5.2.
