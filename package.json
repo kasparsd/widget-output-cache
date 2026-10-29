@@ -1,0 +1,13 @@
+{
+	"name": "widget-output-cache",
+	"scripts": {
+		"build": "rm -rf dist && mkdir dist && cp widget-output-cache.php dist/ && cp -R languages dist/languages && sed -e 's/^# \\(.*\\)$/=== \\1 ===/' -e 's/^## \\(.*\\)$/== \\1 ==/' -e 's/^### \\(.*\\)$/= \\1 =/' -e '/^<!-- changelog -->$/d' readme.md > dist/readme.txt",
+		"zip": "npm run build && npx wp-release zip dist --slug widget-output-cache --force",
+		"release": "wp-release",
+		"lint": "node lint.mjs"
+	},
+	"devDependencies": {
+		"@wpelevator/wp-release": "^0.17.0",
+		"actionlint": "^2.0.6"
+	}
+}

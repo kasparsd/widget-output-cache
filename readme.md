@@ -36,9 +36,7 @@ None.
 
 ## Changelog
 
-### Unreleased
-* Tested with WordPress 6.9.
-* Added a note in the description that the plugin supports only Classic Widgets.
+<!-- changelog -->
 
 ### 0.5.2
 * Tested with WordPress 4.5.2.
