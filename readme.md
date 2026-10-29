@@ -28,6 +28,21 @@ Install it from the official WordPress repository or use the plugin search in yo
 None.
 
 
+## Contributing
+
+Pull requests are welcome. Please include a changeset with your PR so that any code changes are versioned and changelogged by `@wpelevator/wp-release`
+
+Create a changeset by running `npx changeset` and passing the "widget-output-cache" package, or add a `.changeset/*.md` file manually:
+
+```
+---
+"widget-output-cache": patch
+---
+
+Short description of the change.
+```
+
+
 ## Screenshots
 
 None.
